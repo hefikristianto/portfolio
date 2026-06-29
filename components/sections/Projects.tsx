@@ -6,10 +6,12 @@ import { projects } from "../data/projects";
 export default function Projects() {
   const [activeIndex, setActiveIndex] = useState(0);
   const [animKey, setAnimKey] = useState(0);
+  const [imageError, setImageError] = useState(false);
 
   const activeProject = projects[activeIndex];
 
   const changeProject = (direction: "next" | "prev") => {
+    setImageError(false);
     setAnimKey((current) => current + 1);
 
     setActiveIndex((current) => {
@@ -24,9 +26,15 @@ export default function Projects() {
   const goToProject = (index: number) => {
     if (index === activeIndex) return;
 
+    setImageError(false);
     setAnimKey((current) => current + 1);
     setActiveIndex(index);
   };
+
+  const hasPreview =
+    activeProject.website &&
+    activeProject.website !== "https://example.com" &&
+    activeProject.website !== "http://localhost:3000";
 
   return (
     <section id="projects" className="min-h-screen px-6 py-32 md:px-20">
@@ -55,11 +63,26 @@ export default function Projects() {
             <div className="archive-monitor">
               <div className="monitor-grid" />
 
-              <img
-                src={`/api/screenshot?url=${encodeURIComponent(activeProject.website)}`}
-                alt={activeProject.title}
-                className="project-live-preview"
-              />
+              {hasPreview && !imageError ? (
+                <img
+                  src={`/api/screenshot?url=${encodeURIComponent(
+                    activeProject.website
+                  )}`}
+                  alt={activeProject.title}
+                  className="project-live-preview"
+                  onError={() => setImageError(true)}
+                />
+              ) : (
+                <div className="monitor-placeholder">
+                  <span className="placeholder-pill">LIVE PREVIEW</span>
+
+                  <div className="placeholder-center">
+                    <h4>NO SIGNAL</h4>
+                    <p>Screenshot unavailable.</p>
+                    <small>Project preview pending deployment.</small>
+                  </div>
+                </div>
+              )}
 
               <div className="monitor-reflection" />
               <div className="monitor-scan" />
